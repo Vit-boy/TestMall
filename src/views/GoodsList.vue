@@ -5,6 +5,10 @@
 			<span slot="bread">Goods</span>
 		</nav-bread>
 		<div class="accessory-result-page accessory-page">
+			<symbol id="icon-arrow-short" viewBox="0 0 25 32">
+					<title>arrow-short</title>
+					<path class="path1" d="M24.487 18.922l-1.948-1.948-8.904 8.904v-25.878h-2.783v25.878l-8.904-8.904-1.948 1.948 12.243 12.243z"></path>
+			</symbol>
 		  <div class="container">
 		    <div class="filter-nav">
 		      <span class="sortby">Sort by:</span>
@@ -41,6 +45,9 @@
 		              </div>
 		            </li>
 		          </ul>
+							<div v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="20">
+								加载中...
+							</div>
 		        </div>
 		      </div>
 		    </div>
@@ -80,7 +87,8 @@
 				],
 				priceChecked:'all',
 				filterBy:false,
-				overLayFlag:false
+				overLayFlag:false,
+				busy: true
 			}
 		},
 		components:{
@@ -89,10 +97,10 @@
 			NavBread
 		},
 		mounted: function(){
-			this.getGoodsList()
+			this.getGoodsList(false)
 		},
 		methods:{
-			getGoodsList(){
+			getGoodsList(flag){
 				var param = {
 					page: this.page,
 					pageSize: this.pageSize,
@@ -101,7 +109,20 @@
 				axios.get("/goods",{params:param}).then((result)=>{
 					var res = result.data
 					if(res.status == "0"){
-						this.goodsList = res.result.list;
+						if(flag){
+							this.goodsList = this.goodsList.concat(res.result.list);
+							
+							if(res.result.count == 0){
+								this.busy = true;
+							}
+							else{
+								this.busy = false;
+							}
+						}
+						else{
+							this.goodsList = res.result.list;
+							this.busy = false;
+						}
 					}
 					else{
 						this.goodsList = [];
@@ -123,7 +144,14 @@
 			sortGoods(){
 				this.sortFlag = !this.sortFlag;
 				this.page = 1;
-				this.getGoodsList();
+				this.getGoodsList(false);
+			},
+			loadMore(){
+				this.busy = true;
+				setTimeout(() => {
+					this.page ++;
+					this.getGoodsList(true);
+				}, 500);
 			}
 		}
 	}
