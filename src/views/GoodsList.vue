@@ -12,8 +12,8 @@
 		  <div class="container">
 		    <div class="filter-nav">
 		      <span class="sortby">Sort by:</span>
-		      <a href="javascript:void(0)" class="default cur">Default</a>
-		      <a href="javascript:void(0)" class="price" @click="sortGoods">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
+		      <a href="javascript:void(0)" class="default" v-bind:class="{'cur':!sortClick}" @click="sortGoodsDefault">Default</a>
+		      <a href="javascript:void(0)" class="price" v-bind:class="{'cur':sortClick,'sort-up':sortFlag}" @click="sortGoods">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
 		      <a href="javascript:void(0)" class="filterby stopPop" @click="showFilterPop">Filter by</a>
 		    </div>
 		    <div class="accessory-result">
@@ -21,7 +21,7 @@
 		      <div class="filter stopPop" id="filter" v-bind:class="{'filterby-show':filterBy}">
 		        <dl class="filter-price">
 		          <dt>Price:</dt>
-		          <dd><a href="javascript:void(0)" v-bind:class="{'cur':priceChecked=='all'}" @click="priceChecked='all'">All</a></dd>
+		          <dd><a href="javascript:void(0)" v-bind:class="{'cur':priceChecked=='all'}" @click="setPriceFilter('all')">All</a></dd>
 		          <dd v-for="(price,index) in priceFilter">
 		            <a href="javascript:void(0)" v-bind:class="{'cur':priceChecked==index}" @click="setPriceFilter(index)">{{price.startPrice}} - {{price.endPrice}}</a>
 		          </dd>
@@ -40,14 +40,14 @@
 		                <div class="name">{{item.productName}}</div>
 		                <div class="price">￥{{item.salePrice}}</div>
 		                <div class="btn-area">
-		                  <a href="javascript:;" class="btn btn--m">加入购物车</a>
+		                  <a href="javascript:;" class="btn btn--m" @click="addCart(item.productId)">加入购物车</a>
 		                </div>
 		              </div>
 		            </li>
 		          </ul>
-							<div v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="20">
-								加载中...
-							</div>
+					<div v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="20" style="height: 40px;text-align: center;">
+						<img src="../../static/loading-svg/loading-spokes.svg" v-show="loading" />
+					</div>
 		        </div>
 		      </div>
 		    </div>
@@ -68,12 +68,17 @@
 		data(){
 			return{
 				goodsList: [],
+				sortClick: false,
 				sortFlag: true,
 				page:1,
 				pageSize:8,
 				priceFilter: [
 					{
 						startPrice:'0.00',
+						endPrice:'100.00'
+					},
+					{
+						startPrice:'100.00',
 						endPrice:'500.00'
 					},
 					{
@@ -82,13 +87,14 @@
 					},
 					{
 						startPrice:'1000.00',
-						endPrice:'2000.00'
+						endPrice:'5000.00'
 					}
 				],
 				priceChecked:'all',
 				filterBy:false,
 				overLayFlag:false,
-				busy: true
+				busy: true,
+				loading: false
 			}
 		},
 		components:{
@@ -104,10 +110,13 @@
 				var param = {
 					page: this.page,
 					pageSize: this.pageSize,
-					sort: this.sortFlag?1:-1
+					sort: this.sortFlag?1:-1,
+					priceLevel: this.priceChecked
 				}
+				this.loading = true;
 				axios.get("/goods",{params:param}).then((result)=>{
-					var res = result.data
+					var res = result.data;
+					this.loading = false;
 					if(res.status == "0"){
 						if(flag){
 							this.goodsList = this.goodsList.concat(res.result.list);
@@ -140,8 +149,17 @@
 			setPriceFilter(index){
 				this.priceChecked = index;
 				this.closePop();
+				this.page = 1;
+				this.getGoodsList()
+			},
+			sortGoodsDefault(){
+				this.sortClick = false;
+				this.sortFlag = true;
+				this.page = 1;
+				this.getGoodsList(false);
 			},
 			sortGoods(){
+				this.sortClick = true;
 				this.sortFlag = !this.sortFlag;
 				this.page = 1;
 				this.getGoodsList(false);
@@ -152,6 +170,18 @@
 					this.page ++;
 					this.getGoodsList(true);
 				}, 500);
+			},
+			addCart(productId){
+				axios.post("/goods/addCart", {
+					productId: productId
+				}).then((res) => {
+					if(res.data.status == 0){
+						alert("加入成功");
+					}
+					else{
+						alert("msg:"+res.data.msg);
+					}
+				})
 			}
 		}
 	}
