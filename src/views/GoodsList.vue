@@ -54,6 +54,26 @@
 		  </div>
 		</div>
 		<div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
+		<modal v-bind:mdShow="mdShow" v-on:close="closeModal">
+			<p slot="message">
+				请先登陆，否则无法加入到购物车中!
+			</p>
+			<div slot="btnGroup">
+				<a class="btn btn--m" href="javascript:;" @click="mdShow=false">关闭</a>
+			</div>
+		</modal>
+		<modal v-bind:mdShow="mdShowCart" v-on:close="closeModal">
+			<p slot="message">
+				<svg class="icon-status-ok">
+				  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-status-ok"></use>
+				</svg>
+				<span>加入购物车成功!</span>
+			</p>
+			<div slot="btnGroup">
+				<a class="btn btn--m" href="javascript:;" @click="mdShowCart=false">继续购物</a>
+				<router-link class="btn btn--m" href="javascript:;" to="/cart">查看购物车</router-link>
+			</div>
+		</modal>
 		<nav-footer></nav-footer>
 	</div>
 </template>
@@ -63,6 +83,7 @@
 	import NavHeader from '@/components/NavHeader'
 	import NavFooter from '@/components/NavFooter'
 	import NavBread from '@/components/NavBread'
+	import Modal from '@/components/Modal'
 	import axios from 'axios'
 	export default{
 		data(){
@@ -94,13 +115,16 @@
 				filterBy:false,
 				overLayFlag:false,
 				busy: true,
-				loading: false
+				loading: false,
+				mdShow: false,
+				mdShowCart: false
 			}
 		},
 		components:{
 			NavHeader,
 			NavFooter,
-			NavBread
+			NavBread,
+			Modal
 		},
 		mounted: function(){
 			this.getGoodsList(false)
@@ -114,7 +138,7 @@
 					priceLevel: this.priceChecked
 				}
 				this.loading = true;
-				axios.get("/goods",{params:param}).then((result)=>{
+				axios.get("/goods/list",{params:param}).then((result)=>{
 					var res = result.data;
 					this.loading = false;
 					if(res.status == "0"){
@@ -176,12 +200,18 @@
 					productId: productId
 				}).then((res) => {
 					if(res.data.status == 0){
-						alert("加入成功");
+						// alert("加入成功");
+						this.mdShowCart = true;
 					}
 					else{
-						alert("msg:"+res.data.msg);
+						this.mdShow = true;
+						// alert("msg:"+res.data.msg);
 					}
 				})
+			},
+			closeModal(){
+				this.mdShow = false;
+				this.mdShowCart = false;
 			}
 		}
 	}
