@@ -198,10 +198,11 @@
 				this.modalConfirm = false;
 			},
 			delCartConfirm(productId){
+				this.productId = productId;
 				this.modalConfirm = true;
 			},
 			delCart(){
-				axios.post("/users/cart/del",{
+				axios.post("/users/cartDel",{
 					productId:this.productId
 				}).then((response)=>{
 					let res = response.data;

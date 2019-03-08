@@ -109,7 +109,7 @@ router.get("/cartList", function(req, res, next) {
 })
 
 //购物车删除
-router.post("/cart/del", function(req, res, next) {
+router.post("/cartDel", function(req, res, next) {
 	var userId = req.cookies.userId,productId = req.body.productId;
 	User.update({
 		userId:userId
