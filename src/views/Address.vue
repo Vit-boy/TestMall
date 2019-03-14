@@ -174,6 +174,7 @@
 				axios.get("/users/addressList").then((response) => {
 					let res = response.data;
 					this.addressList = res.result;
+					this.selectedAddressId = res.result[0].addressId;
 				})
 			},
 			expand(){
