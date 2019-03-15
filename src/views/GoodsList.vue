@@ -202,6 +202,7 @@
 					if(res.data.status == 0){
 						// alert("加入成功");
 						this.mdShowCart = true;
+						this.$store.commit("updateCartCount",1)
 					}
 					else{
 						this.mdShow = true;

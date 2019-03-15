@@ -17,6 +17,11 @@ export default new Router({
       component: GoodsList
     },
 	{
+	  path: '/goods',
+	  name: 'GoodsList',
+	  component: GoodsList
+	},
+	{
 		path: '/cart',
 		name: 'Cart',
 		component: Cart
