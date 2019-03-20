@@ -5,7 +5,7 @@ var Goods = require('../models/goods');
 var User = require('../models/user');
 
 //连接NMongoDB数据库
-mongoose.connect('mongodb://127.0.0.1:27017/db_demo');
+mongoose.connect('mongodb://127.0.0.1:17017/demo');
 
 mongoose.connection.on("connected", ()=>{
 	console.log("MongoDB connected success.");
